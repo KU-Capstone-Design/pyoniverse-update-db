@@ -34,7 +34,7 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
                 hint = EventRepository()._make_hint()
             case "brands":
                 filters = BrandRepository()._make_filter(data=data)
-                hint = EventRepository()._make_hint()
+                hint = BrandRepository()._make_hint()
             case _:
                 raise BadRequestError(f"{rel_name} not in [products, events, brands")
         res = self.__bulk_write(
@@ -67,7 +67,6 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
                     hint=hint,
                 )
             )
-
         result = defaultdict(int)
         db = self.__client.get_database(
             db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
