@@ -5,14 +5,14 @@ from typing import Mapping
 from chalice import Chalice
 from chalice.app import BadRequestError, SQSEvent
 
-from chalicelib.db.repositoryfacade import RepositoryFacade
+from chalicelib.db.mongo.repositoryfacade import MongoRepositoryFacade
 from chalicelib.download.s3 import S3Downloader
 from chalicelib.model.message import Message
 from chalicelib.processor.domain.transform_processor import TransformProcessor
 
 
 app = Chalice(app_name="pyoniverse-update-db")
-repository = RepositoryFacade()
+repository = MongoRepositoryFacade()
 downloader = S3Downloader()
 transform_processor = TransformProcessor(downloader, repository)
 
