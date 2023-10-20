@@ -4,10 +4,11 @@ from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
-from pymongo.results import BulkWriteResult
+from pymongo.results import BulkWriteResult, UpdateResult
 
 from chalicelib.db.model.filter import Filter
 from chalicelib.db.mongo.brand import BrandRepository
+from chalicelib.db.mongo.converter import MongoFilterConverter
 from chalicelib.db.mongo.event import EventRepository
 from chalicelib.db.mongo.product import ProductRepository
 from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
@@ -16,6 +17,7 @@ from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
 class MongoRepositoryFacade(RepositoryFacade_ifs):
     def __init__(self):
         self.__client = MongoClient(os.getenv("MONGO_URI"))
+        self.__filter_converter = MongoFilterConverter()
 
     def upsert(
         self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
@@ -86,4 +88,16 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         _filter: Dict[str, Filter],
         datum: Dict[str, Any],
     ) -> Mapping[str, int]:
-        pass
+        _filter = {k: self.__filter_converter.convert(v) for k, v in _filter.items()}
+        db = self.__client.get_database(
+            db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
+        )
+        res: UpdateResult = db[rel_name].update_many(
+            filter=_filter,
+            update={"$set": datum},
+        )
+        result = {
+            "matched_count": res.matched_count,
+            "updated_count": res.modified_count,
+        }
+        return result
