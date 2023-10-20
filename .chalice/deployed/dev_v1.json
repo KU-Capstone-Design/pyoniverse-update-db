@@ -3,7 +3,7 @@
     {
       "name": "managed-layer",
       "resource_type": "lambda_layer",
-      "layer_version_arn": "arn:aws:lambda:ap-northeast-2:792939917746:layer:pyoniverse-update-db-dev_v1-managed-layer:1"
+      "layer_version_arn": "arn:aws:lambda:ap-northeast-2:792939917746:layer:pyoniverse-update-db-dev_v1-managed-layer:6"
     },
     {
       "name": "upsert",

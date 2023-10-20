@@ -31,10 +31,10 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
                 hint = ProductRepository()._make_hint()
             case "events":
                 filters = EventRepository()._make_filter(data=data)
-                hint = ProductRepository()._make_hint()
+                hint = EventRepository()._make_hint()
             case "brands":
                 filters = BrandRepository()._make_filter(data=data)
-                hint = ProductRepository()._make_hint()
+                hint = EventRepository()._make_hint()
             case _:
                 raise BadRequestError(f"{rel_name} not in [products, events, brands")
         res = self.__bulk_write(
