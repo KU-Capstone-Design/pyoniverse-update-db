@@ -29,7 +29,7 @@ jobs:
         shell: bash
         env:
           IAM_ROLE_ARN: ${{ secrets.LAMBDA_ARN }}
-          QUEUE_NAME: ${{ secrets.QUEUE_NAME_DEV }}
+          QUEUE_NAME: ${{ secrets.DB_SQS_NAME_DEV }}
           S3_BUCKET: ${{ secrets.S3_TMP_BUCKET }}
         run: |
           # Make .env file
