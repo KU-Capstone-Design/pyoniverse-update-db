@@ -1,23 +1,28 @@
 import os
 from collections import defaultdict
-from typing import Any, Dict, Mapping, NoReturn, Sequence, Tuple
+from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
 from pymongo.results import BulkWriteResult
 
-from chalicelib.db.domain.brand import BrandRepository
-from chalicelib.db.domain.event import EventRepository
-from chalicelib.db.domain.product import ProductRepository
+from chalicelib.db.model.filter import Filter
+from chalicelib.db.mongo.brand import BrandRepository
+from chalicelib.db.mongo.event import EventRepository
+from chalicelib.db.mongo.product import ProductRepository
+from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
 
 
-class RepositoryFacade:
+class MongoRepositoryFacade(RepositoryFacade_ifs):
     def __init__(self):
         self.__client = MongoClient(os.getenv("MONGO_URI"))
 
     def upsert(
         self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
     ) -> Mapping[str, int]:
+        """
+        각 데이터마다 필터가 있고, 하나씩 업데이트된다.
+        """
         match rel_name:
             case "products":
                 filters = ProductRepository()._make_filter(data=data)
@@ -30,7 +35,7 @@ class RepositoryFacade:
                 hint = ProductRepository()._make_hint()
             case _:
                 raise BadRequestError(f"{rel_name} not in [products, events, brands")
-        res = self._bulk_write(
+        res = self.__bulk_write(
             db_name=db_name,
             rel_name=rel_name,
             filters=filters,
@@ -39,7 +44,7 @@ class RepositoryFacade:
         )
         return res
 
-    def _bulk_write(
+    def __bulk_write(
         self,
         db_name: str,
         rel_name: str,
@@ -55,7 +60,7 @@ class RepositoryFacade:
             buffer.append(
                 UpdateOne(
                     filter=_filter,
-                    update=_datum,
+                    update={"$set": _datum},
                     upsert=True,
                     hint=hint,
                 )
@@ -73,3 +78,12 @@ class RepositoryFacade:
             result["inserted_count"] += res.upserted_count
             result["deleted_count"] += res.deleted_count
         return result
+
+    def update_many(
+        self,
+        rel_name: str,
+        db_name: str,
+        _filter: Dict[str, Filter],
+        datum: Dict[str, Any],
+    ) -> Mapping[str, int]:
+        pass
