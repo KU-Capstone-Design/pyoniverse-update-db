@@ -68,16 +68,18 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
                 )
             )
         result = defaultdict(int)
-        db = self.__client.get_database(
-            db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
-        )
-        for p in range(0, len(buffer), 100):
-            tmp = buffer[p : p + 100]
-            res: BulkWriteResult = db[rel_name].bulk_write(tmp, ordered=False)
-            result["matched_count"] += res.matched_count
-            result["updated_count"] += res.modified_count
-            result["inserted_count"] += res.upserted_count
-            result["deleted_count"] += res.deleted_count
+        if buffer:
+            db = self.__client.get_database(
+                db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
+            )
+            for p in range(0, len(buffer), 100):
+                tmp = buffer[p : p + 100]
+                res: BulkWriteResult = db[rel_name].bulk_write(tmp, ordered=False)
+                result["matched_count"] += res.matched_count
+                result["updated_count"] += res.modified_count
+                result["inserted_count"] += res.upserted_count
+                result["deleted_count"] += res.deleted_count
+        result["total_count"] = len(buffer)
         return result
 
     def update_many(
