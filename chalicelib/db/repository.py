@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from typing import Dict, NoReturn, Sequence, Tuple
+from typing import Any, Dict, NoReturn, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
@@ -15,7 +15,9 @@ class Repository:
     def __init__(self):
         self.__client = MongoClient(os.getenv("MONGO_URI"))
 
-    def upsert(self, rel_name: str, db_name: str, data: list) -> NoReturn:
+    def upsert(
+        self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
+    ) -> NoReturn:
         match rel_name:
             case "products":
                 ProductRepository().upsert(

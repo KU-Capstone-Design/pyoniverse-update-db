@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, NoReturn, Sequence
 
 from chalice import BadRequestError
 
@@ -10,7 +10,9 @@ class ProductRepository(Repository):
         super().__init__()
         self.__name = "products"
 
-    def upsert(self, rel_name: str, db_name: str, data: list) -> Dict[str, Any]:
+    def upsert(
+        self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
+    ) -> NoReturn:
         """
         :param rel_name: relation name
         :param db_name: db_name
