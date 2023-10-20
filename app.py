@@ -1,18 +1,20 @@
 import json
 import os
-from typing import Any, Dict, Sequence
+from typing import Mapping
 
 from chalice import Chalice
-from chalice.app import SQSEvent
+from chalice.app import BadRequestError, SQSEvent
 
 from chalicelib.db.repositoryfacade import RepositoryFacade
 from chalicelib.download.s3 import S3Downloader
 from chalicelib.model.message import Message
+from chalicelib.processor.domain.transform_processor import TransformProcessor
 
 
 app = Chalice(app_name="pyoniverse-update-db")
 repository = RepositoryFacade()
 downloader = S3Downloader()
+transform_processor = TransformProcessor(downloader, repository)
 
 
 @app.on_sqs_message(queue=os.getenv("QUEUE_NAME"), batch_size=1)
@@ -20,10 +22,10 @@ def upsert(event: SQSEvent):
     result = {}
     for record in event:
         message = Message.load(json.loads(record.body))
-        data: Sequence[Dict[str, Any]] = downloader.download(message.data)
-        res = repository.upsert(
-            rel_name=message.rel_name, db_name=message.db_name, data=data
-        )
-        app.log.info(f"{message.db_name}.{message.rel_name}: {dict(res)}")
-        result[f"{message.db_name}.{message.rel_name}"] = res
+        match message.origin:
+            case "transform":
+                res: Mapping[str, int] = transform_processor.process(message)
+            case _:
+                raise BadRequestError(f"{message.origin} Not Supported")
+        result[f"{message.db_name}.{message.rel_name}({message.origin})"] = res
     return result

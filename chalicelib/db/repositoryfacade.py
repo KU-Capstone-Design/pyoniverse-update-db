@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from typing import Any, Dict, NoReturn, Sequence, Tuple
+from typing import Any, Dict, Mapping, NoReturn, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
@@ -17,7 +17,7 @@ class RepositoryFacade:
 
     def upsert(
         self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
-    ) -> NoReturn:
+    ) -> Mapping[str, int]:
         match rel_name:
             case "products":
                 filters = ProductRepository()._make_filter(data=data)
@@ -37,7 +37,7 @@ class RepositoryFacade:
             data=data,
             hint=hint,
         )
-        return {rel_name: res}
+        return res
 
     def _bulk_write(
         self,
@@ -46,7 +46,7 @@ class RepositoryFacade:
         hint: Sequence[Tuple[str, int]],
         filters: Sequence[Dict[str, Any]],
         data: Sequence[Dict[str, Any]],
-    ) -> Dict[str, int]:
+    ) -> Mapping[str, int]:
         """
         :return: 실행 결과 반환
         """
