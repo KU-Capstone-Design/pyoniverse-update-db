@@ -30,10 +30,14 @@ jobs:
         env:
           IAM_ROLE_ARN: ${{ secrets.LAMBDA_ARN }}
           QUEUE_NAME: ${{ secrets.QUEUE_NAME_DEV }}
+          S3_BUCKET: ${{ secrets.S3_TMP_BUCKET }}
         run: |
           # Make .env file
           echo "IAM_ROLE_ARN=$IAM_ROLE_ARN" >> .env
           echo "QUEUE_NAME=QUEUE_NAME" >> .env
+          echo "S3_BUCKET=S3_BUCKET" >> .env
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+
           pip install -r requirements.txt
           python deploy.py --stage=dev_v1
 

@@ -5,13 +5,13 @@ from typing import Any, Dict, Sequence
 from chalice import Chalice
 from chalice.app import SQSEvent
 
-from chalicelib.db.repository import Repository
+from chalicelib.db.repositoryfacade import RepositoryFacade
 from chalicelib.download.s3 import S3Downloader
 from chalicelib.model.message import Message
 
 
 app = Chalice(app_name="pyoniverse-update-db")
-repository = Repository()
+repository = RepositoryFacade()
 downloader = S3Downloader()
 
 

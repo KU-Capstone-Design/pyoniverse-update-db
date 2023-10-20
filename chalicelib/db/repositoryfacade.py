@@ -11,7 +11,7 @@ from chalicelib.db.domain.event import EventRepository
 from chalicelib.db.domain.product import ProductRepository
 
 
-class Repository:
+class RepositoryFacade:
     def __init__(self):
         self.__client = MongoClient(os.getenv("MONGO_URI"))
 
@@ -20,26 +20,32 @@ class Repository:
     ) -> NoReturn:
         match rel_name:
             case "products":
-                ProductRepository().upsert(
-                    rel_name=rel_name, db_name=db_name, data=data
-                )
+                filters = ProductRepository()._make_filter(data=data)
+                hint = ProductRepository()._make_hint()
             case "events":
-                EventRepository().upsert(rel_name=rel_name, db_name=db_name, data=data)
+                filters = EventRepository()._make_filter(data=data)
+                hint = ProductRepository()._make_hint()
             case "brands":
-                BrandRepository().upsert(rel_name=rel_name, db_name=db_name, data=data)
+                filters = BrandRepository()._make_filter(data=data)
+                hint = ProductRepository()._make_hint()
             case _:
                 raise BadRequestError(f"{rel_name} not in [products, events, brands")
-
-    def _make_filter(self, data: list):
-        raise NotImplementedError
+        res = self._bulk_write(
+            db_name=db_name,
+            rel_name=rel_name,
+            filters=filters,
+            data=data,
+            hint=hint,
+        )
+        return {rel_name: res}
 
     def _bulk_write(
         self,
         db_name: str,
         rel_name: str,
         hint: Sequence[Tuple[str, int]],
-        filters: list,
-        data: list,
+        filters: Sequence[Dict[str, Any]],
+        data: Sequence[Dict[str, Any]],
     ) -> Dict[str, int]:
         """
         :return: 실행 결과 반환
