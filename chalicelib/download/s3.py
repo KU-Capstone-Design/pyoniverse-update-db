@@ -14,5 +14,5 @@ class S3Downloader:
         res = []
         for file in data:
             response = s3.Object(self.__bucket, file).get()
-            res.append(json.loads(response["Body"].read().decode()))
+            res += json.loads(response["Body"].read().decode())
         return res
