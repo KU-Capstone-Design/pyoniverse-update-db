@@ -1,5 +1,6 @@
 import os
 from collections import defaultdict
+from datetime import datetime
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from chalice import BadRequestError
@@ -59,6 +60,7 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         """
         buffer = []
         for _filter, _datum in zip(filters, data):
+            _datum["updated_at"] = datetime.utcnow()
             buffer.append(
                 UpdateOne(
                     filter=_filter,
@@ -93,6 +95,7 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         db = self.__client.get_database(
             db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
         )
+        datum["updated_at"] = datetime.utcnow()
         res: UpdateResult = db[rel_name].update_many(
             filter=_filter,
             update={"$set": datum},
