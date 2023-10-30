@@ -22,6 +22,7 @@ def upsert(event: SQSEvent):
     result = {}
     for record in event:
         message = Message.load(json.loads(record.body))
+        app.log.info(message)
         match message.origin:
             case "transform":
                 res: Mapping[str, int] = transform_processor.process(message)

@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict
 from datetime import datetime
@@ -5,6 +6,7 @@ from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
+from pymongo.errors import ConfigurationError
 from pymongo.results import BulkWriteResult, UpdateResult
 
 from chalicelib.db.model.filter import Filter
@@ -18,6 +20,12 @@ from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
 class MongoRepositoryFacade(RepositoryFacade_ifs):
     def __init__(self):
         self.__client = MongoClient(os.getenv("MONGO_URI"))
+        try:
+            self.__client.admin.command("ping")
+        except ConfigurationError:
+            logging.error("Cannot connect to client")
+            exit(1)
+
         self.__filter_converter = MongoFilterConverter()
 
     def upsert(
