@@ -12,7 +12,7 @@ from chalicelib.model.message import Message
 from chalicelib.processor.domain.transform_processor import TransformProcessor
 
 
-app = Chalice(app_name="pyoniverse-update-db", debug=True)
+app = Chalice(app_name="pyoniverse-update-db", debug=False)
 resource_injector = ResourceInjector()
 resource_injector.init_resources()
 
