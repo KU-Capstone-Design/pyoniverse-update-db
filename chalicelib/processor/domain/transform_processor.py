@@ -25,4 +25,5 @@ class TransformProcessor(ProcessorIfs):
             datum={"status": 1},
         )
         self.logger.info(f"invalid: {invalid_result}, valid: {valid_result}")
-        return res
+        result = {"invalid": invalid_result, "valid": valid_result}
+        return result
