@@ -16,7 +16,7 @@ app = Chalice(app_name="pyoniverse-update-db", debug=False)
 resource_injector = ResourceInjector()
 resource_injector.init_resources()
 
-repository = MongoRepositoryFacade(client=resource_injector.client)
+repository = MongoRepositoryFacade(client=resource_injector.client())
 downloader = S3Downloader()
 transform_processor = TransformProcessor(downloader, repository)
 
