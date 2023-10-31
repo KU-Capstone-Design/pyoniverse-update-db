@@ -1,12 +1,10 @@
 import logging
-import os
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
-from pymongo.errors import ConfigurationError
 from pymongo.results import BulkWriteResult, UpdateResult
 
 from chalicelib.db.model.filter import Filter
@@ -18,14 +16,9 @@ from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
 
 
 class MongoRepositoryFacade(RepositoryFacade_ifs):
-    def __init__(self):
-        self.__client = MongoClient(os.getenv("MONGO_URI"))
-        try:
-            self.__client.admin.command("ping")
-        except ConfigurationError:
-            logging.error("Cannot connect to client")
-            exit(1)
-
+    def __init__(self, client: MongoClient):
+        self.logger = logging.getLogger(__name__)
+        self.__client = client
         self.__filter_converter = MongoFilterConverter()
 
     def upsert(
@@ -80,7 +73,7 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         result = defaultdict(int)
         if buffer:
             db = self.__client.get_database(
-                db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
+                db_name, write_concern=WriteConcern(w="majority", j=True)
             )
             for p in range(0, len(buffer), 100):
                 tmp = buffer[p : p + 100]
@@ -112,4 +105,5 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
             "matched_count": res.matched_count,
             "updated_count": res.modified_count,
         }
+        self.logger.info(f"Upsert result: {result}")
         return result

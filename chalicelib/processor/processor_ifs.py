@@ -9,7 +9,7 @@ class ProcessorIfs(metaclass=ABCMeta):
     def __init__(self, downloader, repository):
         self._downloader = downloader
         self._repository = repository
-        self.logger = logging.getLogger("pyoniverse-update-db")
+        self.logger = logging.getLogger(__name__)
 
     @abstractmethod
     def process(self, message: Message) -> Mapping[str, Mapping[str, int]]:
