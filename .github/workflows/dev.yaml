@@ -35,7 +35,7 @@ jobs:
           # Make .env file
           echo "IAM_ROLE_ARN=$IAM_ROLE_ARN" >> .env
           echo "QUEUE_NAME=$QUEUE_NAME" >> .env
-          echo "SLACK_QUEUE_NAME=${{ secrets.SLACK_SQS_NAME_DEV }}"
+          echo "SLACK_QUEUE_NAME=${{ secrets.SLACK_SQS_NAME_DEV }}" >> .env
           echo "S3_BUCKET=$S3_BUCKET" >> .env
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
 
