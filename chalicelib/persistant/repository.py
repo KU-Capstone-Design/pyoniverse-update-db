@@ -3,23 +3,14 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
-from chalice import BadRequestError
 from pymongo import MongoClient, UpdateOne, WriteConcern
 from pymongo.results import BulkWriteResult, UpdateResult
 
-from chalicelib.db.model.filter import Filter
-from chalicelib.db.mongo.brand import BrandRepository
-from chalicelib.db.mongo.converter import MongoFilterConverter
-from chalicelib.db.mongo.event import EventRepository
-from chalicelib.db.mongo.product import ProductRepository
-from chalicelib.db.repositoryfacade_ifs import RepositoryFacade_ifs
 
-
-class MongoRepositoryFacade(RepositoryFacade_ifs):
+class MongoRepository:
     def __init__(self, client: MongoClient):
         self.logger = logging.getLogger(__name__)
         self.__client = client
-        self.__filter_converter = MongoFilterConverter()
 
     def upsert(
         self, rel_name: str, db_name: str, data: Sequence[Dict[str, Any]]
@@ -27,18 +18,19 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         """
         각 데이터마다 필터가 있고, 하나씩 업데이트된다.
         """
-        match rel_name:
-            case "products":
-                filters = ProductRepository()._make_filter(data=data)
-                hint = ProductRepository()._make_hint()
-            case "events":
-                filters = EventRepository()._make_filter(data=data)
-                hint = EventRepository()._make_hint()
-            case "brands":
-                filters = BrandRepository()._make_filter(data=data)
-                hint = BrandRepository()._make_hint()
-            case _:
-                raise BadRequestError(f"{rel_name} not in [products, events, brands")
+        if rel_name not in {"products", "events"}:
+            self.logger.error(f"{rel_name} should be in [products, events]")
+            raise RuntimeError(f"{rel_name} should be in [products, events]")
+        filters = []
+        for d in data:
+            _filter = {
+                "crawled_infos.spider": {
+                    "$in": [c["spider"] for c in d["crawled_infos"]]
+                },
+                "crawled_infos.id": {"$in": [c["id"] for c in d["crawled_infos"]]},
+            }
+            filters.append(_filter)
+        hint = [("crawled_infos.spider", 1), ("crawled_infos.id", 1)]
         res = self.__bulk_write(
             db_name=db_name,
             rel_name=rel_name,
@@ -89,12 +81,11 @@ class MongoRepositoryFacade(RepositoryFacade_ifs):
         self,
         rel_name: str,
         db_name: str,
-        _filter: Dict[str, Filter],
+        _filter: dict,
         datum: Dict[str, Any],
     ) -> Mapping[str, int]:
-        _filter = {k: self.__filter_converter.convert(v) for k, v in _filter.items()}
         db = self.__client.get_database(
-            db_name, write_concern=WriteConcern(w="majority", wtimeout=5000)
+            db_name, write_concern=WriteConcern(w="majority", j=True)
         )
         datum["updated_at"] = datetime.utcnow()
         res: UpdateResult = db[rel_name].update_many(

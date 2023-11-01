@@ -1,5 +1,5 @@
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from marshmallow import EXCLUDE, Schema, fields, types
@@ -13,7 +13,7 @@ class SlackMessage:
     source: str
     text: str
     cc: list
-    ps: dict = None
+    ps: dict = field(default_factory=dict)
 
     class __MessageSchema(Schema):
         type: str = fields.Enum(required=True, enum=MessageTypeEnum)
