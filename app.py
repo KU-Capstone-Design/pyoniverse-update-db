@@ -2,18 +2,18 @@ import json
 import os
 import traceback
 from typing import Mapping
-from botocore import errorfactory
+
 from chalice import Chalice
 from chalice.app import BadRequestError, SQSEvent
 
 from chalicelib.db.mongo.repositoryfacade import MongoRepositoryFacade
 from chalicelib.dependency_injector.resource import ResourceInjector
 from chalicelib.io.downloader import S3Downloader
+from chalicelib.io.slack.model.enum.message_enum import MessageTypeEnum
+from chalicelib.io.slack.model.message import SlackMessage
+from chalicelib.io.slack.sender import SlackSender
 from chalicelib.model.message import Message
 from chalicelib.processor.domain.transform_processor import TransformProcessor
-from chalicelib.io.slack.model.enum import MessageTypeEnum
-from chalicelib.io.slack.model import SlackMessage
-from chalicelib.io.slack.sender import SlackSender
 
 
 app = Chalice(app_name="pyoniverse-update-db", debug=False)
@@ -21,7 +21,7 @@ resource_injector = ResourceInjector()
 resource_injector.init_resources()
 
 repository = MongoRepositoryFacade(client=resource_injector.client())
-downloader = S3Downloader()
+downloader = S3Downloader(bucket=os.getenv("S3_BUCKET"))
 transform_processor = TransformProcessor(downloader, repository)
 slack_sender = SlackSender(slack_queue_name=os.getenv("SLACK_QUEUE_NAME"))
 
