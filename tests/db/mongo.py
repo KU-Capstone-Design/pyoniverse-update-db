@@ -1,2 +1,0 @@
-class MongoRepository:
-    pass
