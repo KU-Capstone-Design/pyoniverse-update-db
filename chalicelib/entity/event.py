@@ -25,7 +25,11 @@ class EventEntity(BaseEntity):
     @classmethod
     def from_dict(cls, data: dict) -> "EventEntity":
         return cls(
-            crawled_infos=list(map(CrawledInfoEntity.from_dict, data["crawled_infos"])),
+            crawled_infos=list(
+                map(CrawledInfoEntity.from_dict, data.get("crawled_infos"))
+            )
+            if data.get("crawled_infos")
+            else [],
             id=data.get("id"),
             status=data.get("status"),
             created_at=data.get("created_at"),
