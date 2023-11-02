@@ -17,6 +17,7 @@ def test_mongo_parser(env):
     # when
     query: Query = parser.parse(message)
     # then
+    assert query.origin == message.origin
     assert query.db_name == message.db_name
     assert query.rel_name == message.rel_name
     assert query.action == message.action

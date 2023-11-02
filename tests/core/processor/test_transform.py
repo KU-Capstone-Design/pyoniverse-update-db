@@ -30,6 +30,7 @@ def test_transform_processor(resource_injector):
     # when
     result: Result = processor.execute(query)
     # then
+    assert result.origin == query.origin
     assert result.db_name == query.db_name
     assert result.rel_name == query.rel_name
     assert result.action == query.action

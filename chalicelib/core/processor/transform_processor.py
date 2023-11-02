@@ -3,7 +3,7 @@ import logging
 import traceback
 from collections import defaultdict
 from dataclasses import asdict
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any, Dict, List, Sequence
 
 import boto3
 from pymongo import MongoClient, UpdateOne, WriteConcern
@@ -15,35 +15,12 @@ from chalicelib.core.model.result import Result
 from chalicelib.entity.base import EntityType
 from chalicelib.entity.event import EventEntity
 from chalicelib.entity.product import ProductEntity
-from chalicelib.model.message import Message
 
 
 class TransformQueryProcessor(QueryProcessorIfs):
     def __init__(self, client: MongoClient):
         self.__client = client
         self.logger = logging.getLogger(__name__)
-
-    def process(self, message: Message) -> Mapping[str, Mapping[str, int]]:
-        data: Sequence[Dict[str, Any]] = self.__downloader.download(message.data)
-        res = self.__repository.upsert(
-            rel_name=message.rel_name, db_name=message.db_name, data=data
-        )
-        # status 바꾸기
-        invalid_result = self.__repository.update_many(
-            rel_name=message.rel_name,
-            db_name=message.db_name,
-            _filter={"status": {"$lt": 2}},
-            datum={"status": -1},
-        )
-        valid_result = self.__repository.update_many(
-            rel_name=message.rel_name,
-            db_name=message.db_name,
-            _filter={"status": {"$eq": 2}},
-            datum={"status": 1},
-        )
-        self.logger.info(f"invalid: {invalid_result}, valid: {valid_result}")
-        result = {"invalid": invalid_result, "valid": valid_result}
-        return result
 
     def execute(self, query: Query) -> Result:
         """
@@ -133,6 +110,7 @@ class TransformQueryProcessor(QueryProcessorIfs):
         tmp_result["modified_count"] = updated_res.modified_count
 
         result = Result(
+            origin=query.origin,
             db_name=query.db_name,
             rel_name=query.rel_name,
             filter=query.filter,

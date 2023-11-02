@@ -12,6 +12,7 @@ class MongoMessageParser(MessageParser):
 
     def parse(self, message: Message) -> Query:
         query = Query(
+            origin=message.origin,
             db_name=message.db_name,
             rel_name=message.rel_name,
             action=message.action,
