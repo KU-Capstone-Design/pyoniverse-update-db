@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Mapping, Sequence
 
-from chalicelib.io.downloader import S3Downloader
+from chalicelib.downloader import S3Downloader
 from chalicelib.model.message import Message
 from chalicelib.persistant.repository import MongoRepository
 

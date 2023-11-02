@@ -5,10 +5,12 @@ from typing import NoReturn
 
 import boto3
 
-from chalicelib.io.slack.model.message import SlackMessage
+from chalicelib.alarm.interface import AlarmIfs
+from chalicelib.alarm.slack.model.message import SlackMessage
+from chalicelib.core.model.result import Result
 
 
-class SlackSender:
+class SlackAlarm(AlarmIfs):
     def __init__(self, slack_queue_name: str, *args, **kwargs):
         self.logger = logging.getLogger(__name__)
         if not slack_queue_name:
@@ -22,6 +24,9 @@ class SlackSender:
         except Exception as e:
             self.logger.error(f"There's no queue: {slack_queue_name}")
             raise RuntimeError(f"There's no queue: {slack_queue_name}")
+
+    def notice(self, result: Result):
+        pass
 
     def send(self, message: SlackMessage) -> NoReturn:
         try:

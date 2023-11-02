@@ -6,10 +6,10 @@ from chalice import Chalice
 from chalice.app import BadRequestError, SQSEvent
 
 from chalicelib.extern.dependency_injector.resource import ResourceInjector
-from chalicelib.io.downloader import S3Downloader
-from chalicelib.io.slack.model.enum.message_enum import MessageTypeEnum
-from chalicelib.io.slack.model.message import SlackMessage
-from chalicelib.io.slack.sender import SlackSender
+from chalicelib.downloader import S3Downloader
+from chalicelib.alarm.slack.model.enum.message_enum import MessageTypeEnum
+from chalicelib.alarm.slack.model.message import SlackMessage
+from chalicelib.alarm.slack.alarm import SlackAlarm
 from chalicelib.model.message import Message
 from chalicelib.persistant.repository import MongoRepository
 from chalicelib.processor.transform_processor import TransformProcessor
@@ -22,7 +22,7 @@ resource_injector.init_resources()
 repository = MongoRepository(client=resource_injector.client())
 downloader = S3Downloader(bucket=os.getenv("S3_BUCKET"))
 transform_processor = TransformProcessor(downloader=downloader, repository=repository)
-slack_sender = SlackSender(slack_queue_name=os.getenv("SLACK_QUEUE_NAME"))
+slack_sender = SlackAlarm(slack_queue_name=os.getenv("SLACK_QUEUE_NAME"))
 
 
 @app.on_sqs_message(queue=os.getenv("QUEUE_NAME"), batch_size=1)

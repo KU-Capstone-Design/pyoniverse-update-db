@@ -1,6 +1,6 @@
 import os
 
-from chalicelib.io.downloader import S3Downloader
+from chalicelib.downloader import S3Downloader
 from tests.mock import env
 
 

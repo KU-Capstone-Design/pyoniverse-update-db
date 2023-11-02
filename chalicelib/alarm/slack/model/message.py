@@ -4,7 +4,7 @@ from typing import List
 
 from marshmallow import EXCLUDE, Schema, fields, types
 
-from chalicelib.io.slack.model.enum.message_enum import MessageTypeEnum
+from chalicelib.alarm.slack.model.enum.message_enum import MessageTypeEnum
 
 
 @dataclass(kw_only=True)
