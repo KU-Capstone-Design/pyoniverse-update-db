@@ -5,7 +5,7 @@ from datetime import datetime
 
 from chalice.test import Client
 
-from chalicelib.model.message import Message
+from chalicelib.core.model.message import Message
 from tests.mock import client, env
 
 
@@ -13,17 +13,25 @@ def test_transform_origin(env, client: Client):
     # given
     message = asdict(
         Message(
-            date=datetime.now(),
             origin="transform",
             rel_name="products",
-            db_name="service_dev",
+            db_name="test",
             data=[],
+            filters=[],
+            action="UPDATE",
         )
     )
+    message["date"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     message["data"] = [
-        f"etl-transform/dev/crawling/products_{idx}.json" for idx in range(200)
+        {"column": "bucket", "value": os.getenv("S3_BUCKET")},
+        {
+            "column": "keys",
+            "value": [
+                f"etl-transform/dev/crawling/products_{idx}.json" for idx in range(5)
+            ],
+        },
     ]
-    message["date"] = message["date"].strftime("%Y-%m-%d")
+
     try:
         client.lambda_.invoke(
             "upsert",

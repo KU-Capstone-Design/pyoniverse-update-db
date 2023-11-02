@@ -8,5 +8,5 @@ class Result:
     rel_name: str = field(default=None)
     action: str = field(default=None)
     filter: dict | None = field(default=None)
-    data: dict | None = field(default=None)
+    data: str | dict | None = field(default=None)
     modified_count: int = field(default=None)

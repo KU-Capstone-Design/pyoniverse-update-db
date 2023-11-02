@@ -57,7 +57,6 @@ class TransformQueryProcessor(QueryProcessorIfs):
             case "events":
                 return EventEntity.from_dict(datum)
             case _:
-                self.logger.error(f"{rel_name} should be in [products, events]")
                 raise RuntimeError(f"{rel_name} should be in [products, events]")
 
     def __write(

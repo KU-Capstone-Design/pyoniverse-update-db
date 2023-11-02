@@ -48,7 +48,6 @@ class MongoMessageParser(MessageParser):
             case "in":
                 result = {_filter.column: {"in": _filter.value}}
             case _:
-                self.logger.error(f"Fail to parse message's filter: {_filter}")
                 raise RuntimeError(f"Fail to parse message's filter: {_filter}")
         return result
 

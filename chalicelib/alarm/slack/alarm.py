@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from dataclasses import asdict
 
 import boto3
@@ -14,7 +15,6 @@ class SlackAlarm(AlarmIfs):
     def __init__(self, slack_queue_name: str):
         self.logger = logging.getLogger(__name__)
         if not slack_queue_name:
-            self.logger.error(f"{slack_queue_name} shouldn't be none")
             raise RuntimeError(f"{slack_queue_name} shouldn't be none")
         self.__sqs_client = boto3.client("sqs")
         try:
@@ -22,22 +22,30 @@ class SlackAlarm(AlarmIfs):
                 QueueName=slack_queue_name
             )["QueueUrl"]
         except Exception as e:
-            self.logger.error(f"There's no queue: {slack_queue_name}")
             raise RuntimeError(f"There's no queue: {slack_queue_name}")
 
     def notice(self, result: Result):
         ps = {}
-        ps["action"] = result.action
-        ps["modified_count"] = str(result.modified_count)
+        if result.action:
+            ps["action"] = result.action
+        if result.modified_count:
+            ps["modified_count"] = str(result.modified_count)
         if result.filter:
             ps["filter"] = json.dumps(result.filter, ensure_ascii=False)
         if result.data:
             ps["data"] = json.dumps(result.data, ensure_ascii=False)
 
+        text = ""
+        if result.origin:
+            text += result.origin
+        if result.db_name:
+            text += f"-{result.db_name}"
+        if result.rel_name:
+            text += f"-{result.rel_name}"
         message = SlackMessage(
             type=MessageTypeEnum.DEBUG,
-            source="update-db",
-            text=f"{result.origin}: {result.db_name}.{result.rel_name}",
+            source="pyoniverse-update-db",
+            text=text,
             cc=["윤영로"],
             ps=ps,
         )
@@ -47,5 +55,4 @@ class SlackAlarm(AlarmIfs):
                 MessageBody=json.dumps(asdict(message)),
             )
         except Exception as e:
-            self.logger.error(e)
-            raise RuntimeError(e)
+            self.logger.error(traceback.format_exc())
