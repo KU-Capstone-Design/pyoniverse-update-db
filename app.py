@@ -20,6 +20,7 @@ injector.config.slack_queue_name.from_env("SLACK_QUEUE_NAME", required=True)
 injector.config.queue_name.from_env("QUEUE_NAME", required=True)
 
 transform_processor = injector.transform_query_processor()
+api_processor = injector.api_query_processor()
 message_parser = injector.message_parser()
 slack_alarm = injector.slack_alarm()
 
@@ -62,6 +63,8 @@ def upsert(event: SQSEvent):
                 match message.origin:
                     case "transform":
                         result: Result = transform_processor.execute(query=query)
+                    case "api":
+                        result: Result = api_processor.execute(query=query)
                     case _:
                         raise RuntimeError(f"{message.origin} Not Supported")
             except Exception as e:
