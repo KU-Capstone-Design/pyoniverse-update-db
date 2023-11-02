@@ -26,6 +26,8 @@ class TransformQueryProcessor(QueryProcessorIfs):
         """
         :param query: {"bucket": s3-bucket, "keys": [key list]}
         """
+        if query.action != "UPSERT":
+            raise RuntimeError(f"{query.action} should be in ['UPSERT']")
         bucket, keys = query.data["bucket"], query.data["keys"]
         data: Sequence[Dict[str, Any]] = self.__download(bucket=bucket, keys=keys)
         entities: Sequence[EntityType] = [

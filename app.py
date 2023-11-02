@@ -77,3 +77,6 @@ def upsert(event: SQSEvent):
             origin=app.app_name, action="ERROR REPORT", data=traceback.format_exc()
         )
         slack_alarm.notice(result)
+        return False
+    else:
+        return True
