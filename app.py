@@ -5,7 +5,7 @@ import traceback
 from chalice import Chalice
 from chalice.app import BadRequestError, SQSEvent
 
-from chalicelib.dependency_injector.resource import ResourceInjector
+from chalicelib.extern.dependency_injector.resource import ResourceInjector
 from chalicelib.io.downloader import S3Downloader
 from chalicelib.io.slack.model.enum.message_enum import MessageTypeEnum
 from chalicelib.io.slack.model.message import SlackMessage
