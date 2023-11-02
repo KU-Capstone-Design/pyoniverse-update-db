@@ -17,4 +17,21 @@ class BaseEntity:
         pass
 
 
+@dataclass(kw_only=True)
+class CrawledInfoEntity:
+    spider: str = field(default=None)
+    id: str = field(default=None)
+    url: str = field(default=None)
+    brand: int = field(default=None)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "CrawledInfoEntity":
+        return cls(
+            spider=data.get("spider"),
+            id=data.get("id"),
+            url=data.get("url"),
+            brand=data.get("brand"),
+        )
+
+
 EntityType = TypeVar("EntityType", bound=BaseEntity)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from chalicelib.entity.base import BaseEntity
+from chalicelib.entity.base import BaseEntity, CrawledInfoEntity
 
 
 @dataclass(kw_only=True)
@@ -39,6 +39,7 @@ class ProductHistoryEntity:
 
 @dataclass(kw_only=True)
 class ProductEntity(BaseEntity):
+    crawled_infos: List[CrawledInfoEntity] = field(default_factory=list)
     best: ProductBestEntity = field(default_factory=ProductBestEntity)
     brands: List[ProductBrandEntity] = field(default_factory=list)
     category: int = field(default=None)
@@ -56,6 +57,7 @@ class ProductEntity(BaseEntity):
     @classmethod
     def from_dict(cls, data: dict) -> "ProductEntity":
         return cls(
+            crawled_infos=list(map(CrawledInfoEntity.from_dict, data["crawled_infos"])),
             id=data.get("id"),
             status=data.get("status"),
             created_at=data.get("created_at"),

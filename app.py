@@ -12,7 +12,7 @@ from chalicelib.alarm.slack.model.message import SlackMessage
 from chalicelib.alarm.slack.alarm import SlackAlarm
 from chalicelib.model.message import Message
 from chalicelib.persistant.repository import MongoRepository
-from chalicelib.processor.transform_processor import TransformProcessor
+from chalicelib.core.processor.transform_processor import TransformQueryProcessor
 
 
 app = Chalice(app_name="pyoniverse-update-db", debug=False)
@@ -21,7 +21,9 @@ resource_injector.init_resources()
 
 repository = MongoRepository(client=resource_injector.client())
 downloader = S3Downloader(bucket=os.getenv("S3_BUCKET"))
-transform_processor = TransformProcessor(downloader=downloader, repository=repository)
+transform_processor = TransformQueryProcessor(
+    downloader=downloader, repository=repository
+)
 slack_sender = SlackAlarm(slack_queue_name=os.getenv("SLACK_QUEUE_NAME"))
 
 

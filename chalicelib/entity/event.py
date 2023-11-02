@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from chalicelib.entity.base import BaseEntity
+from chalicelib.entity.base import BaseEntity, CrawledInfoEntity
 
 
 @dataclass(kw_only=True)
@@ -12,6 +12,7 @@ class EventImageEntity:
 
 @dataclass(kw_only=True)
 class EventEntity(BaseEntity):
+    crawled_infos: List[CrawledInfoEntity] = field(default_factory=list)
     brand: int = field(default=None)
     description: str = field(default=None)
     start_at: int = field(default=None)
@@ -24,6 +25,7 @@ class EventEntity(BaseEntity):
     @classmethod
     def from_dict(cls, data: dict) -> "EventEntity":
         return cls(
+            crawled_infos=list(map(CrawledInfoEntity.from_dict, data["crawled_infos"])),
             id=data.get("id"),
             status=data.get("status"),
             created_at=data.get("created_at"),
