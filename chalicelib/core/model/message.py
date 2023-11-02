@@ -1,19 +1,19 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 
 @dataclass(kw_only=True, frozen=True)
 class Data:
     column: str = field(default=None)
-    value: str = field(default=None)
+    value: Any = field(default=None)
 
 
 @dataclass(kw_only=True, frozen=True)
 class Filter:
     column: str = field(default=None)
     op: str = field(default=None)
-    value: str = field(default=None)
+    value: Any = field(default=None)
 
 
 @dataclass(kw_only=True, frozen=True)
