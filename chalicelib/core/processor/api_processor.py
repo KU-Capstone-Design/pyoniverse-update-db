@@ -23,8 +23,10 @@ class ApiQueryProcessor(QueryProcessorIfs):
         match query.action:
             case "UPDATE":
                 result: Result = self.__update(query=query, data=data)
+            case "ADD":
+                result: Result = self.__add(query=query, data=data)
             case _:
-                raise RuntimeError(f"{query.action} should be in ['UPDATE']")
+                raise RuntimeError(f"{query.action} should be in ['UPDATE', 'ADD']")
         return result
 
     def __validate(self, data: dict, rel_name: str) -> dict:
@@ -38,7 +40,7 @@ class ApiQueryProcessor(QueryProcessorIfs):
         tmp = asdict(entity)
         result = {}
         for key, val in tmp.items():
-            if val is not None:
+            if key in data:
                 result[key] = val
         if not result:
             # empty result
@@ -55,6 +57,25 @@ class ApiQueryProcessor(QueryProcessorIfs):
         res: UpdateResult = db[query.rel_name].update_many(
             filter=query.filter, update={"$set": data}, upsert=False
         )
+        result = Result(
+            origin=query.origin,
+            db_name=query.db_name,
+            rel_name=query.rel_name,
+            filter=query.filter,
+            action=query.action,
+            data=query.data,
+            modified_count=res.modified_count,
+        )
+        return result
+
+    def __add(self, query: Query, data: dict) -> Result:
+        """
+        filter와 일치하는 "모든" 데이터를 수정한다
+        """
+        coll = self.__client.get_database(
+            query.db_name, write_concern=WriteConcern(w="majority", j=True)
+        ).get_collection(query.rel_name)
+        res: UpdateResult = coll.update_many(filter=query.filter, update={"$inc": data})
         result = Result(
             origin=query.origin,
             db_name=query.db_name,
