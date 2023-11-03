@@ -31,6 +31,9 @@ if __name__ == "__main__":
         if "environment_variables" not in config:
             config["environment_variables"] = {}
         config["environment_variables"]["QUEUE_NAME"] = os.getenv("QUEUE_NAME")
+        config["environment_variables"]["SLACK_QUEUE_NAME"] = os.getenv(
+            "SLACK_QUEUE_NAME"
+        )
         config["environment_variables"]["S3_BUCKET"] = os.getenv("S3_BUCKET")
         config["environment_variables"]["MONGO_URI"] = os.getenv("MONGO_URI")
 
