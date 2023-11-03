@@ -15,7 +15,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("--stage", type=str)
     args = parser.parse_args()
-    exit_code = 1
 
     # load config file
     with open(r".chalice/config.json", "r") as f:
@@ -39,10 +38,10 @@ if __name__ == "__main__":
         with open(r".chalice/config.json", "w") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
         # deploy
-        exit_code = os.system(f"chalice deploy --stage {args.stage}")
+        os.system(f"chalice deploy --stage {args.stage}")
     except Exception as e:
-        tb = traceback.format_exc()
-        print(f"Error: {tb}")
+        print(traceback.format_exc())
+        raise e
     finally:
         # rollback config file
         with open(r".chalice/config.json.bak", "r") as f:
@@ -51,4 +50,3 @@ if __name__ == "__main__":
             json.dump(config, f, indent=4, ensure_ascii=False)
         # remove backup file
         os.remove(r".chalice/config.json.bak")
-        exit(exit_code)

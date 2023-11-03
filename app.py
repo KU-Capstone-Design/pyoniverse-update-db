@@ -28,7 +28,7 @@ app = Chalice(app_name="pyoniverse-update-db", debug=False)
 logger = logging.getLogger(__name__)
 
 
-@app.on_sqs_message(queue=injector.config.queue_name, batch_size=1)
+@app.on_sqs_message(queue=injector.config.queue_name(), batch_size=1)
 def upsert(event: SQSEvent):
     try:
         for record in event:
