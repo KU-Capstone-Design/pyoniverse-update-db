@@ -8,7 +8,7 @@ def test_mongo_parser(env):
     # given
     parser = MongoMessageParser()
     message = Message(
-        db_name="test_db",
+        db_name="test",
         rel_name="test_rel",
         action="UPDATE",
         filters=[Filter(column="status", op="lt", value=2)],

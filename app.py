@@ -75,6 +75,7 @@ def upsert(event: SQSEvent):
                 logger.info(result)
                 if result.db_name != "test":
                     # test mode에서는 slack 메시지 X
+                    logger.info("TEST MODE: Don't send slack")
                     slack_alarm.notice(result=result)
     except Exception as e:
         logger.error(traceback.format_exc())

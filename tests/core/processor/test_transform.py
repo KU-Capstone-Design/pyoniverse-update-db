@@ -20,7 +20,7 @@ def test_transform_processor(resource_injector):
     query = Query(
         db_name="test",
         rel_name="products",
-        action="UPDATE",
+        action="UPSERT",
         filter=None,
         data={
             "bucket": "pyoniverse-tmp",
