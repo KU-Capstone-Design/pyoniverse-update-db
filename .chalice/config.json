@@ -3,6 +3,7 @@
     "app_name": "pyoniverse-update-db",
     "api_gateway_endpoint_type": "REGIONAL",
     "lambda_timeout": 900,
+    "lambda_memory_size": 192,
     "manage_iam_role": false,
     "automatic_layer": true,
     "environment_variables": {
