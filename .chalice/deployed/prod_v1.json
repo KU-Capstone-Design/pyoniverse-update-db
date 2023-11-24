@@ -1,0 +1,24 @@
+{
+  "resources": [
+    {
+      "name": "managed-layer",
+      "resource_type": "lambda_layer",
+      "layer_version_arn": "arn:aws:lambda:ap-northeast-2:792939917746:layer:pyoniverse-update-db-prod_v1-managed-layer:4"
+    },
+    {
+      "name": "upsert",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:ap-northeast-2:792939917746:function:pyoniverse-update-db-prod_v1-upsert"
+    },
+    {
+      "name": "upsert-sqs-event-source",
+      "resource_type": "sqs_event",
+      "queue_arn": "arn:aws:sqs:ap-northeast-2:792939917746:pyoniverse-db-queue-prod",
+      "event_uuid": "84e25109-92ed-47aa-9e5f-e34596b0b58e",
+      "queue": "pyoniverse-db-queue-prod",
+      "lambda_arn": "arn:aws:lambda:ap-northeast-2:792939917746:function:pyoniverse-update-db-prod_v1-upsert"
+    }
+  ],
+  "schema_version": "2.0",
+  "backend": "api"
+}

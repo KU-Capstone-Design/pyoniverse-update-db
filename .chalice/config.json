@@ -1,0 +1,26 @@
+{
+    "version": "2.0",
+    "app_name": "pyoniverse-update-db",
+    "api_gateway_endpoint_type": "REGIONAL",
+    "lambda_timeout": 900,
+    "lambda_memory_size": 512,
+    "manage_iam_role": false,
+    "automatic_layer": true,
+    "environment_variables": {
+        "COUNTRY_CODE": "kr"
+    },
+    "stages": {
+        "dev_v1": {
+            "api_gateway_stage": "dev",
+            "environment_variables": {
+                "LOG_LEVEL": "DEBUG"
+            }
+        },
+        "prod_v1": {
+            "api_gateway_stage": "prod",
+            "environment_variables": {
+                "LOG_LEVEL": "INFO"
+            }
+        }
+    }
+}
