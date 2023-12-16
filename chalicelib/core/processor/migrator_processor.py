@@ -18,7 +18,10 @@ class MigratorQueryProcessor(QueryProcessorIfs):
         match query.action:
             case "UPDATE":
                 data = list(
-                    map(lambda x: self.__validate(x, query.rel_name), query.data)
+                    map(
+                        lambda x: self.__validate(x, query.rel_name),
+                        query.data["documents"],
+                    )
                 )
                 result: Result = self.__update(query=query, data=data)
             case _:
