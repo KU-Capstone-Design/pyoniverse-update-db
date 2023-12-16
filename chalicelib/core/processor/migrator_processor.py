@@ -1,31 +1,29 @@
 import logging
 from dataclasses import asdict
 
-from pymongo import MongoClient, WriteConcern
-from pymongo.results import UpdateResult
+from pymongo import MongoClient, UpdateOne, WriteConcern
 
 from chalicelib.core.interface.processor import QueryProcessorIfs
 from chalicelib.core.model.query import Query
 from chalicelib.core.model.result import Result
-from chalicelib.entity.event import EventEntity
 from chalicelib.entity.product import ProductEntity
 
 
-class ApiQueryProcessor(QueryProcessorIfs):
+class MigratorQueryProcessor(QueryProcessorIfs):
     def __init__(self, client: MongoClient):
         self.__client = client
         self.logger = logging.getLogger(__name__)
 
     def execute(self, query: Query) -> Result:
-        """
-        :param query: {"bucket": s3-bucket, "keys": [key list]}
-        """
-        data = self.__validate(query.data, query.rel_name)
         match query.action:
             case "UPDATE":
+                data = list(
+                    map(
+                        lambda x: self.__validate(x, query.rel_name),
+                        query.data["documents"],
+                    )
+                )
                 result: Result = self.__update(query=query, data=data)
-            case "ADD":
-                result: Result = self.__add(query=query, data=data)
             case _:
                 raise RuntimeError(f"{query.action} should be in ['UPDATE', 'ADD']")
         return result
@@ -34,8 +32,6 @@ class ApiQueryProcessor(QueryProcessorIfs):
         match rel_name:
             case "products":
                 entity = ProductEntity.from_dict(data)
-            case "events":
-                entity = EventEntity.from_dict(data)
             case _:
                 raise RuntimeError(f"{rel_name} should be in ['products', 'events']")
         tmp = asdict(entity)
@@ -48,16 +44,15 @@ class ApiQueryProcessor(QueryProcessorIfs):
             raise RuntimeError(f"{rel_name} Schema doesn't support {data}")
         return result
 
-    def __update(self, query: Query, data: dict) -> Result:
-        """
-        filter와 일치하는 "모든" 데이터를 업데이트한다.
-        """
+    def __update(self, query: Query, data: list) -> Result:
         db = self.__client.get_database(
             query.db_name, write_concern=WriteConcern(w="majority", j=True)
         )
-        res: UpdateResult = db[query.rel_name].update_many(
-            filter=query.filter, update={"$set": data}, upsert=False
-        )
+        buffer = [UpdateOne(filter={"id": d["id"]}, update={"$set": d}) for d in data]
+        modified_count = 0
+        for idx in range(0, len(buffer), 100):
+            tmp = db[query.rel_name].bulk_write(buffer[idx : idx + 100])
+            modified_count += tmp.modified_count
         result = Result(
             origin=query.origin,
             db_name=query.db_name,
@@ -65,25 +60,6 @@ class ApiQueryProcessor(QueryProcessorIfs):
             filter=query.filter,
             action=query.action,
             data=query.data,
-            modified_count=res.modified_count,
-        )
-        return result
-
-    def __add(self, query: Query, data: dict) -> Result:
-        """
-        filter와 일치하는 "모든" 데이터를 수정한다
-        """
-        coll = self.__client.get_database(
-            query.db_name, write_concern=WriteConcern(w="majority", j=True)
-        ).get_collection(query.rel_name)
-        res: UpdateResult = coll.update_many(filter=query.filter, update={"$inc": data})
-        result = Result(
-            origin=query.origin,
-            db_name=query.db_name,
-            rel_name=query.rel_name,
-            filter=query.filter,
-            action=query.action,
-            data=query.data,
-            modified_count=res.modified_count,
+            modified_count=modified_count,
         )
         return result
