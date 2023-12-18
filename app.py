@@ -22,7 +22,6 @@ injector.config.queue_name.from_env("QUEUE_NAME", required=True)
 transform_processor = injector.transform_query_processor()
 api_processor = injector.api_query_processor()
 migrator_processor = injector.migrator_query_processor()
-
 message_parser = injector.message_parser()
 slack_alarm = injector.slack_alarm()
 
