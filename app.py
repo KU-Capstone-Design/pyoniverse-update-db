@@ -79,6 +79,9 @@ def upsert(event: SQSEvent):
                 if result.db_name == "test":
                     # test mode에서는 slack 메시지 X
                     logger.info("TEST MODE: Don't send slack")
+                elif result.origin == "api":
+                    # api에서 온 것은 slack 메시지 X
+                    logger.info("API Origin: Don't send slack")
                 else:
                     slack_alarm.notice(result=result)
     except Exception as e:
