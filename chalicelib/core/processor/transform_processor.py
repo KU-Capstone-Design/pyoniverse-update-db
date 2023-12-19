@@ -78,12 +78,14 @@ class TransformQueryProcessor(QueryProcessorIfs):
             }
             filters.append(_filter)
 
-            datum = {}
-            tmp = asdict(entity)
-            for key, val in tmp.items():
-                if val is not None:
-                    datum[key] = val
-            data.append(datum)
+            # bugfix: update db는 전송된 데이터를 그대로 업데이트 해야한다.
+            # datum = {}
+            # tmp = asdict(entity)
+            # for key, val in tmp.items():
+            #     if val is not None:
+            #         datum[key] = val
+            # data.append(datum)
+            data.append(asdict(entity))
 
         buffer = [
             UpdateOne(filter=_filter, update={"$set": datum}, upsert=True)
