@@ -88,7 +88,6 @@ class TransformQueryProcessor(QueryProcessorIfs):
                 datum["category"] = datum.get("category", None)
                 datum["description"] = datum.get("description", None)
             data.append(datum)
-            data.append(asdict(entity))
 
         buffer = [
             UpdateOne(filter=_filter, update={"$set": datum}, upsert=True)
