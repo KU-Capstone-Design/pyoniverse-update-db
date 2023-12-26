@@ -79,12 +79,15 @@ class TransformQueryProcessor(QueryProcessorIfs):
             filters.append(_filter)
 
             # bugfix: update db는 전송된 데이터를 그대로 업데이트 해야한다.
-            # datum = {}
-            # tmp = asdict(entity)
-            # for key, val in tmp.items():
-            #     if val is not None:
-            #         datum[key] = val
-            # data.append(datum)
+            datum = {}
+            tmp = asdict(entity)
+            for key, val in tmp.items():
+                if val is not None:
+                    datum[key] = val
+            if query.rel_name == "products":
+                datum["category"] = datum.get("category", None)
+                datum["description"] = datum.get("description", None)
+            data.append(datum)
             data.append(asdict(entity))
 
         buffer = [
